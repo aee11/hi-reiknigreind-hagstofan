@@ -68,7 +68,7 @@ request({url: url, json: true}, (err, res, body) => {
         const marketArea = valueToText(dataCell.key[2], 'Markaðssvæði');
         const itemGroup = getItemGroupFor(dataCell.key[1]);
         const value = Number(dataCell.values[0]);
-        if (itemGroup && marketArea !== 'Alls') {
+        if (itemGroup && marketArea !== 'Alls' && value > 0) {
           insertInto(yearResult, itemGroup, itemName, marketArea, value);
         }
       });
