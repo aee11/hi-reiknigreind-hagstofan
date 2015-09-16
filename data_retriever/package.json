@@ -1,0 +1,16 @@
+{
+  "name": "data_retriever",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "deepmerge": "^0.2.10",
+    "lodash": "^3.10.1",
+    "request": "^2.62.0"
+  }
+}
