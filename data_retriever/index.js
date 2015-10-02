@@ -59,42 +59,50 @@ request({url: url, json: true}, (err, res, body) => {
       return acc;
     }, {})
 
-    let overallResult = {};
+    let overallResult = { name: 'Útflutningur', children: []};
     _.forEach(dataByYear, (data, year) => {
-      let yearResult = { name: 'Útflutningur', children: []};
+      // let yearResult = { name: 'Útflutningur', children: []};
       _.forEach(data, dataCell => {
         // console.log(dataCell);
         const itemName = valueToText(dataCell.key[1], 'Vöruflokkar');
         const marketArea = valueToText(dataCell.key[2], 'Markaðssvæði');
         const itemGroup = getItemGroupFor(dataCell.key[1]);
         const value = Number(dataCell.values[0]);
-        if (itemGroup && marketArea !== 'Alls' && value > 0) {
-          insertInto(yearResult, itemGroup, itemName, marketArea, value);
+        if (itemGroup && marketArea !== 'Alls') {
+          insertInto(overallResult, itemGroup, itemName, marketArea, value, year);
         }
       });
-      overallResult[year] = yearResult;
+      // overallResult[year] = yearResult;
     });
-    fs.writeFileSync('../utflutningur.json', JSON.stringify(overallResult, null, 4));
+    fs.writeFileSync('../utflutningur_2_with_zeroes.json', JSON.stringify(overallResult, null, 4));
   });
 });
 
-function insertInto(result, itemGroup, itemName, marketArea, value) {
+function insertInto(result, itemGroup, itemName, marketArea, value, year) {
   const groupIndex = _.findIndex(result.children, group => group.name == itemGroup);
   if (groupIndex !== -1) {
     const itemIndex = _.findIndex(result.children[groupIndex].children, 
       item => item.name == itemName);
     if (itemIndex !== -1) {
-      result.children[groupIndex]
+      const marketIndex = _.findIndex(result.children[groupIndex].children[itemIndex].children,
+        market => market.name == marketArea);
+      if (marketIndex !== -1) {
+        result.children[groupIndex]
+              .children[itemIndex]
+              .children[marketIndex][year] = value;
+      } else {
+        result.children[groupIndex]
             .children[itemIndex]
             .children
-            .push({ name: marketArea, size: value });
+            .push({ name: marketArea, [year]: value });
+      }
     } else {
       result.children[groupIndex].children.push({ name: itemName, children: []});
-      insertInto(result, itemGroup, itemName, marketArea, value);
+      insertInto(result, itemGroup, itemName, marketArea, value, year);
     }
   } else {
     result.children.push({ name: itemGroup, children: []});
-    insertInto(result, itemGroup, itemName, marketArea, value);
+    insertInto(result, itemGroup, itemName, marketArea, value, year);
   }
 }
 
