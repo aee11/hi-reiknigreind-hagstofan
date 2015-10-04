@@ -1,3 +1,7 @@
+html {
+  overflow-y: scroll;
+}
+
 #ex1Slider .slider-selection {
   background: #BABABA;
 }
@@ -38,4 +42,9 @@
 
 .y.axis path {
   stroke: black;
+}
+
+
+#d3container {
+  margin-top: 2em;
 }
