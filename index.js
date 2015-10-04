@@ -5,7 +5,7 @@ var width = 1400,
 var x = d3.scale.linear()
     .range([0, 2 * Math.PI]);
 
-var y = d3.scale.sqrt()
+var y = d3.scale.linear()
     .range([0, radius]);
 // var u = d3.scale.pow().exponent(1.3).domain([0, 1]).range([0, radius])
 
