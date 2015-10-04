@@ -212,6 +212,7 @@ function updateBarChart(data) {
   }
   var children = data.children || data.parent.children;
   var rows = children
+    .slice() // clone array
     .sort(function(a, b) {
       return b.value - a.value;
     })
