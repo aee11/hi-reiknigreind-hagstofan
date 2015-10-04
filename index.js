@@ -15,7 +15,7 @@ var svg = d3.select("#d3container").append("svg")
     .attr("width", width)
     .attr("height", height)
   .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+    .attr("transform", "translate(" + width / 2 + "," + (height / 2) + ")");
 
 var minSliceSize = 0.01;
 
@@ -70,6 +70,7 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
     .attr("x", function(d) { return y(d.y); })
     .attr("dx", "6") // margin
     .attr("dy", ".35em") // vertical-align
+    .attr('display', function(d) { return d.value/node.value < minSliceSize ? 'none' : 'block'; })
     .attr('opacity', function(d) { return d.value/node.value < minSliceSize ? '0' : '1'; })
     .text(function(d) {
       return d.name;
@@ -133,14 +134,18 @@ function transitioner(e, i) {
   // check if it is large enough to actually display
   if (e.value/node.value < minSliceSize || e.value && e.value <= 0) {
     d3.select(this.parentNode).select("text")
-      .transition().attr('opacity', 0);
+      .attr('display', 'none')
+      .transition().attr('opacity', 0)
+      
   } else 
   // check if the animated element's data e lies within the visible angle span given in d
   if (e.x >= node.x && e.x < (node.x + node.dx)) {
     // get a selection of the associated text element
     var arcText = d3.select(this.parentNode).select("text");
     // fade in the text element and recalculate positions
-    arcText.transition().duration(750)
+    arcText
+      .attr('display', 'block')
+      .transition().duration(750)
       .attr("opacity", 1)
       .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
       .attr("x", function(d) { return y(d.y); });
