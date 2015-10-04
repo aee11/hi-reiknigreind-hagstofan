@@ -210,8 +210,8 @@ function updateBarChart(data) {
   } else {
     infoHeading.html(data.parent.name)
   }
-  data = data.children || data.parent.children;
-  var rows = data
+  var children = data.children || data.parent.children;
+  var rows = children
     .sort(function(a, b) {
       return b.value - a.value;
     })
