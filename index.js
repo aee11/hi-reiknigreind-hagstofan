@@ -217,7 +217,9 @@ function updateBarChart(data) {
       return b.value - a.value;
     })
     .map(function(child) {
-      return '<tr><th scope="row">'+ child.name +'</th><td>'+ Math.floor(child.value) +'</td></tr>';
+      return '<tr><th scope="row">'+ child.name +'</th>' + 
+        '<td>'+ Math.round(child.value*10)/10 +'</td>' +
+        '<td>'+ Math.round(child.value/child.parent.value*100*10)/10 +'</td></tr>';
     }).join('');
   info.empty().append(rows);
 }
