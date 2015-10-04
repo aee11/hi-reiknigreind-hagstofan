@@ -7,7 +7,6 @@ var x = d3.scale.linear()
 
 var y = d3.scale.linear()
     .range([0, radius]);
-// var u = d3.scale.pow().exponent(1.3).domain([0, 1]).range([0, radius])
 
 var color = d3.scale.category20c();
 
@@ -76,27 +75,6 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
       return d.name;
     });
 
-  // Original:
-  // var path = svg.datum(root).selectAll("path")
-  //     .data(partition.nodes)
-  //   .enter().append("path")
-  //     .attr("d", arc)
-  //     .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-  //     .on("click", click)
-  //     .each(stash);
-
-  // d3.selectAll("input").on("change", function change() {
-  //   var value = this.value === "count"
-  //       ? function() { return 1; }
-  //       : function(d) { return d.size; };
-
-  //   path
-  //       .data(partition.value(value).nodes)
-  //     .transition()
-  //       .duration(1000)
-  //       .attrTween("d", arcTweenData);
-  // });
-
   yearSlider.on('change', function(event) {
     var value = event.value.newValue;
     var dataFunction = function(d) { return d[value] }
@@ -116,9 +94,6 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
   function click(d) {
     node = d;
     text.transition().attr('opacity', 0);
-    // path.transition()
-    //   .duration(1000)
-    //   .attrTween("d", arcTweenZoom(d));
     path.transition()
       .duration(750)
       .attrTween("d", arcTweenZoom(d))
