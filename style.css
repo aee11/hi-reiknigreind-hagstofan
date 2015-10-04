@@ -5,3 +5,37 @@
 .marginupper {
   padding-top: 2.5em;
 }
+
+.slider {
+  margin: 2.5em;
+}
+
+.panel-margin {
+  margin-left: 0.5em;
+  margin-top: 0.5em;
+}
+
+.bar rect {
+  fill: steelblue;
+}
+
+.bar text.value {
+  fill: white;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.axis path {
+  fill: none;
+}
+
+.x.axis line {
+  stroke: #fff;
+  stroke-opacity: .8;
+}
+
+.y.axis path {
+  stroke: black;
+}

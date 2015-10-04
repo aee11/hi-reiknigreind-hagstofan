@@ -1,94 +1,3 @@
-
-
-// var width = 1920,
-//     height = 1080,
-//     radius = Math.min(width, height) / 2;
-// var defaultYear = 1999;
-// var x = d3.scale.linear()
-//     .range([0, 2 * Math.PI]);
-// var y = d3.scale.linear()
-//     .range([0, radius]);
-// var color = d3.scale.category20c();
-// var svg = d3.select("body").append("svg")
-//     .attr("width", width)
-//     .attr("height", height)
-//   .append("g")
-//     .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
-// var partition = d3.layout.partition()
-//     .value(function(d) { return d.size; });
-// var arc = d3.svg.arc()
-//     .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
-//     .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
-//     .innerRadius(function(d) { return Math.max(0, y(d.y)); })
-//     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
-// d3.json("utflutningur.json", function(error, root) {
-//   var g = svg.selectAll("g")
-//       .data(partition.nodes(root['1999']))
-//     .enter().append("g");
-
-//   var path = g.append("path")
-//     .attr("d", arc)
-//     .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-//     .on("click", click);
-//   var text = g.append("text")
-//     .attr("transform", function(d) { return "rotate(" + computeTextRotation(d) + ")"; })
-//     .attr("x", function(d) { return y(d.y); })
-//     .attr("dx", "6") // margin
-//     .attr("dy", ".35em") // vertical-align
-//     .text(function(d) { return d.name; });
-
-//   $('#year').slider({
-//     formatter: function(value) {
-//       return 'Árið ' + value;
-//     }
-//   }).on('change', function(event) {
-//     var value = event.value.newValue;
-//     text.exit().remove();
-//     path.exit().remove();
-//     // path.exit().remove();
-//     g = svg.selectAll("g")
-//         .data(partition.nodes(root[value]))
-//       .transition().append("g");
-
-//   });
-  
-//   function click(d) {
-//     // fade out all text elements
-//     text.transition().attr("opacity", 0);
-//     path.transition()
-//       .duration(750)
-//       .attrTween("d", arcTween(d))
-//       .each("end", function(e, i) {
-//           // check if the animated element's data e lies within the visible angle span given in d
-//           if (e.x >= d.x && e.x < (d.x + d.dx)) {
-//             // get a selection of the associated text element
-//             var arcText = d3.select(this.parentNode).select("text");
-//             // fade in the text element and recalculate positions
-//             arcText.transition().duration(750)
-//               .attr("opacity", 1)
-//               .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-//               .attr("x", function(d) { return y(d.y); });
-//           }
-//       });
-//   }
-// });
-// d3.select(self.frameElement).style("height", height + "px");
-// // Interpolate the scales!
-// function arcTween(d) {
-//   var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
-//       yd = d3.interpolate(y.domain(), [d.y, 1]),
-//       yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
-//   return function(d, i) {
-//     return i
-//         ? function(t) { return arc(d); }
-//         : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
-//   };
-// }
-// function computeTextRotation(d) {
-//   return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
-// }
-
-
 var width = 1400,
     height = 900,
     radius = Math.min(width, height) / 2;
@@ -102,11 +11,13 @@ var y = d3.scale.sqrt()
 
 var color = d3.scale.category20c();
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#d3container").append("svg")
     .attr("width", width)
     .attr("height", height)
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+var minSliceSize = 0.01;
 
 var partition = d3.layout.partition()
     .sort(null)
@@ -117,6 +28,17 @@ var arc = d3.svg.arc()
     .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
     .innerRadius(function(d) { return Math.max(0, y(d.y)); })
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+
+var yearSlider = $('#year').slider({
+  tooltip: 'always',
+  formatter: function(value) {
+    return 'Árið ' + value;
+  }
+});
+
+var infoHeading = $('#info-heading');
+var info = $('#info');
 
 // Keep track of the node that is currently being displayed as the root.
 var node;
@@ -132,6 +54,7 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
       .attr("d", arc)
       .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
       .on("click", click)
+      .on('mouseover', updateBarChart)
       .each(stash);
 
   var text = g.append("text")
@@ -147,6 +70,7 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
     .attr("x", function(d) { return y(d.y); })
     .attr("dx", "6") // margin
     .attr("dy", ".35em") // vertical-align
+    .attr('opacity', function(d) { return d.value/node.value < minSliceSize ? '0' : '1'; })
     .text(function(d) {
       return d.name;
     });
@@ -172,11 +96,7 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
   //       .attrTween("d", arcTweenData);
   // });
 
-  $('#year').slider({
-    formatter: function(value) {
-      return 'Árið ' + value;
-    }
-  }).on('change', function(event) {
+  yearSlider.on('change', function(event) {
     var value = event.value.newValue;
     var dataFunction = function(d) { return d[value] }
     g
@@ -185,30 +105,14 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
       .transition()
         .duration(1000)
         .attrTween("d", arcTweenData)
-        .each("end", function(e, i) {
-          // check if it is large enough to actually display
-          if (e.value/node.value < 0.01 || e.value && e.value <= 0) {
-            d3.select(this.parentNode).select("text")
-              .transition().attr('opacity', 0);
-          } else 
-          // check if the animated element's data e lies within the visible angle span given in d
-          if (e.x >= node.x && e.x < (node.x + node.dx)) {
-            // get a selection of the associated text element
-            var arcText = d3.select(this.parentNode).select("text");
-            // fade in the text element and recalculate positions
-            arcText.transition().duration(750)
-              .attr("opacity", 1)
-              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-              .attr("x", function(d) { return y(d.y); });
-          }
-      });
+        .each("end", transitioner);
     text
       .transition()
         .duration(1000);
+    updateBarChart(node);
   });
 
   function click(d) {
-    console.log(d);
     node = d;
     text.transition().attr('opacity', 0);
     // path.transition()
@@ -217,27 +121,31 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
     path.transition()
       .duration(750)
       .attrTween("d", arcTweenZoom(d))
-      .each("end", function(e, i) {
-          // check if it is large enough to actually display
-          if (e.value/node.value < 0.01 || e.value && e.value <= 0) {
-            d3.select(this.parentNode).select("text")
-              .transition().attr('opacity', 0);
-          } else 
-          // check if the animated element's data e lies within the visible angle span given in d
-          if (e.x >= node.x && e.x < (node.x + node.dx)) {
-            // get a selection of the associated text element
-            var arcText = d3.select(this.parentNode).select("text");
-            // fade in the text element and recalculate positions
-            arcText.transition().duration(750)
-              .attr("opacity", 1)
-              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-              .attr("x", function(d) { return y(d.y); });
-          }
-      });
+      .each("end", transitioner);
+
+    updateBarChart(node);
   }
 });
 
 d3.select(self.frameElement).style("height", height + "px");
+
+function transitioner(e, i) {
+  // check if it is large enough to actually display
+  if (e.value/node.value < minSliceSize || e.value && e.value <= 0) {
+    d3.select(this.parentNode).select("text")
+      .transition().attr('opacity', 0);
+  } else 
+  // check if the animated element's data e lies within the visible angle span given in d
+  if (e.x >= node.x && e.x < (node.x + node.dx)) {
+    // get a selection of the associated text element
+    var arcText = d3.select(this.parentNode).select("text");
+    // fade in the text element and recalculate positions
+    arcText.transition().duration(750)
+      .attr("opacity", 1)
+      .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
+      .attr("x", function(d) { return y(d.y); });
+  }
+}
 
 // Setup for switching data: stash the old values for transition.
 function stash(d) {
@@ -282,3 +190,57 @@ function arcTweenZoom(d) {
 function computeTextRotation(d) {
   return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
 }
+
+var rotationSlider = $('#rotation').slider({
+  tooltip: 'always',
+  formatter: function(value) {
+    return value + ' gráður';
+  }
+});
+
+rotationSlider.on('change', function(event) {
+  var value = event.value.newValue;
+  $('#d3container').css('transform', 'rotate('+value+'deg)');
+});
+
+
+function updateBarChart(data) {
+  if (data.children) {
+    infoHeading.html(data.name);
+  } else {
+    infoHeading.html(data.parent.name)
+  }
+  data = data.children || data.parent.children;
+  var rows = data
+    .sort(function(a, b) {
+      return b.value - a.value;
+    })
+    .map(function(child) {
+      return '<tr><th scope="row">'+ child.name +'</th><td>'+ Math.floor(child.value) +'</td></tr>';
+    }).join('');
+  info.empty().append(rows);
+}
+
+$('#year-plus').click(function() {
+  var currValue = yearSlider.slider('getValue');
+  var nextValue = currValue + 1;
+  yearSlider.slider('setValue', nextValue, true, true);
+});
+
+$('#year-minus').click(function() {
+  var currValue = yearSlider.slider('getValue');
+  var nextValue = currValue - 1;
+  yearSlider.slider('setValue', nextValue, true, true);
+});
+
+$('#rotation-plus').click(function() {
+  var currValue = rotationSlider.slider('getValue');
+  var nextValue = currValue + 30;
+  rotationSlider.slider('setValue', nextValue, true, true);
+});
+
+$('#rotation-minus').click(function() {
+  var currValue = rotationSlider.slider('getValue');
+  var nextValue = currValue - 30;
+  rotationSlider.slider('setValue', nextValue, true, true);
+});
