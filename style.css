@@ -48,3 +48,14 @@ html {
 #d3container {
   margin-top: 2em;
 }
+
+#github-logo {
+  position: fixed;
+  bottom: 1em;
+  right: 1em;
+  opacity: 0.3;
+}
+
+#github-logo:hover {
+  opacity: 1;
+}
