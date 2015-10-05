@@ -17,7 +17,12 @@
   },
   "homepage": "https://github.com/aee11/hi-reiknigreind-hagstofan#readme",
   "dependencies": {
+    "bootstrap": "^3.3.5",
     "bootstrap-slider": "^5.1.0",
-    "d3": "^3.5.6"
-  }
+    "d3": "^3.5.6",
+    "gulp": "^3.9.0",
+    "gulp-uglify": "^1.4.1",
+    "jquery": "^2.1.4"
+  },
+  "devDependencies": {}
 }
