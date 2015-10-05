@@ -36,6 +36,8 @@ var yearSlider = $('#year').slider({
   }
 });
 
+var sliceThickness = y(0.25); // in px
+
 var infoHeading = $('#info-heading');
 var info = $('#info');
 
@@ -57,16 +59,7 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
       .each(stash);
 
   var text = g.append("text")
-    .attr("transform", function(d) {
-      // var n = (d.name || "").split(" ").length > 1,
-      //     e = 180 * x(d.x + d.dx / 2) / Math.PI - 90,
-      //     r = e + (n ? -.5 : 0),
-      //     c = 5;
-      // return "rotate(" + r + ")translate(" + (u(d.y) + c) + ")rotate(" + (e > 90 ? -180 : 0) + ")";
-
-      return "rotate(" + computeTextRotation(d) + ")";
-    })
-    .attr("x", function(d) { return y(d.y); })
+    .attr("transform", textTransform)
     .attr("dx", "6") // margin
     .attr("dy", ".35em") // vertical-align
     .attr('display', function(d) { return d.value/node.value < minSliceSize ? 'none' : 'block'; })
@@ -92,6 +85,10 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
   });
 
   function click(d) {
+    if (d.depth === 3) {
+      // Can't click last arc, e.g. EES, China. 
+      d = d.parent;
+    }
     node = d;
     text.transition().attr('opacity', 0);
     path.transition()
@@ -122,8 +119,7 @@ function transitioner(e, i) {
       .attr('display', 'block')
       .transition().duration(750)
       .attr("opacity", 1)
-      .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
-      .attr("x", function(d) { return y(d.y); });
+      .attr("transform", textTransform);
   }
 }
 
@@ -167,9 +163,22 @@ function arcTweenZoom(d) {
   };
 }
 
+function textTransform(d) {
+  if (d.depth <= node.depth) {
+    return 'translate(20)';
+  }
+  sliceThickness = y(node.y+0.25);
+  var xTranslate = y(d.y);
+  var c = node.depth === 0 ? 0 : 20; // Minor correction if not in top view
+  var rotation = computeTextRotation(d);
+  return "rotate(" + rotation + ")translate(" + (rotation > 90 ? xTranslate+sliceThickness-c : xTranslate) + ")rotate(" + (rotation > 90 ? -180 : 0) + ")";
+}
+
 function computeTextRotation(d) {
   return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
 }
+
+
 
 var rotationSlider = $('#rotation').slider({
   tooltip: 'always',
