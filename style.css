@@ -59,3 +59,12 @@ html {
 #github-logo:hover {
   opacity: 1;
 }
+
+.highlighted-slice {
+  stroke: rgba(0, 0, 0, 0.56);
+  stroke-width: 3px;
+}
+
+#info tr {
+  cursor: pointer;
+}

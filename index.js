@@ -54,8 +54,9 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
   var path = g.append("path")
       .attr("d", arc)
       .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+      .on('dblclick', function (d) { console.log(d); })
       .on("click", click)
-      .on('mouseover', updateBarChart)
+      // .on('mouseover', updateBarChart)
       .each(stash);
 
   var text = g.append("text")
@@ -67,6 +68,8 @@ d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
     .text(function(d) {
       return d.name;
     });
+
+  updateBarChart(node);
 
   yearSlider.on('change', function(event) {
     var value = event.value.newValue;
@@ -178,20 +181,7 @@ function computeTextRotation(d) {
   return (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
 }
 
-
-
-var rotationSlider = $('#rotation').slider({
-  tooltip: 'always',
-  formatter: function(value) {
-    return value + ' gráður';
-  }
-});
-
-rotationSlider.on('change', function(event) {
-  var value = event.value.newValue;
-  $('#d3container').css('transform', 'rotate('+value+'deg)');
-});
-
+var highlightedSlices = [];
 
 function updateBarChart(data) {
   if (data.children) {
@@ -206,11 +196,28 @@ function updateBarChart(data) {
       return b.value - a.value;
     })
     .map(function(child) {
-      return '<tr><th scope="row">'+ child.name +'</th>' + 
+      var rowClass = highlightedSlices.indexOf(child.name) === -1 ? '' : 'info';
+      return '<tr class="' + rowClass + '">'+ 
+        '<th scope="row">'+ child.name +'</th>' + 
         '<td>'+ Math.round(child.value*10)/10 +'</td>' +
         '<td>'+ Math.round(child.value/child.parent.value*100*10)/10 +'</td></tr>';
     }).join('');
   info.empty().append(rows);
+  info.children('tr').on('click', function(event) {
+    var sliceName = $(this).children().first().text();
+    var pathElement = $('#d3container text').filter(function () {
+      return $(this).text() === sliceName;
+    }).prev();
+    if (!!pathElement.attr('class')) {
+      highlightedSlices.splice(highlightedSlices.indexOf(sliceName), 1);
+      $(this).removeClass('info');
+      pathElement.removeAttr('class');
+    } else {
+      highlightedSlices.push(sliceName);
+      $(this).addClass('info');
+      pathElement.attr('class', 'highlighted-slice');
+    }
+  });
 }
 
 $('#year-plus').click(function() {
@@ -223,16 +230,4 @@ $('#year-minus').click(function() {
   var currValue = yearSlider.slider('getValue');
   var nextValue = currValue - 1;
   yearSlider.slider('setValue', nextValue, true, true);
-});
-
-$('#rotation-plus').click(function() {
-  var currValue = rotationSlider.slider('getValue');
-  var nextValue = currValue + 30;
-  rotationSlider.slider('setValue', nextValue, true, true);
-});
-
-$('#rotation-minus').click(function() {
-  var currValue = rotationSlider.slider('getValue');
-  var nextValue = currValue - 30;
-  rotationSlider.slider('setValue', nextValue, true, true);
 });
