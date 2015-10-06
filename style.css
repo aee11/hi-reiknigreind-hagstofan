@@ -63,6 +63,7 @@ html {
 .highlighted-slice {
   stroke: rgba(0, 0, 0, 0.56);
   stroke-width: 3px;
+  fill-opacity: 0.8;
 }
 
 #info tr {
