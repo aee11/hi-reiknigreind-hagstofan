@@ -48,35 +48,81 @@ request({url: url, json: true}, (err, res, body) => {
   // console.log(valueToText('13', 'Vöruflokkar')); // returns '125 Langa' 
 
   request.post({ url: url, json: query, encoding: 'utf8' }, (err, res, body) => {
-    const data = body.data;
-    const dataByYear = data.reduce((acc, dataEntry) => {
-      const year = Number(dataEntry.key[0]) + 1999;
-      if (acc[year]) {
-        acc[year].push(dataEntry);
-      } else {
-        acc[year] = [dataEntry];
-      }
-      return acc;
-    }, {})
 
-    let overallResult = { name: 'Útflutningur', children: []};
-    _.forEach(dataByYear, (data, year) => {
-      // let yearResult = { name: 'Útflutningur', children: []};
-      _.forEach(data, dataCell => {
-        // console.log(dataCell);
-        const itemName = valueToText(dataCell.key[1], 'Vöruflokkar');
-        const marketArea = valueToText(dataCell.key[2], 'Markaðssvæði');
-        const itemGroup = getItemGroupFor(dataCell.key[1]);
-        const value = Number(dataCell.values[0]);
-        if (itemGroup && marketArea !== 'Alls') {
-          insertInto(overallResult, itemGroup, itemName, marketArea, value, year);
-        }
-      });
-      // overallResult[year] = yearResult;
-    });
-    fs.writeFileSync('../utflutningur_2_with_zeroes.json', JSON.stringify(overallResult, null, 4));
+    function saveDataCatFirst(err, res, body){
+      const data = body.data;
+        const dataByYear = data.reduce((acc, dataEntry) => {
+          const year = Number(dataEntry.key[0]) + 1999;
+          if (acc[year]) {
+            acc[year].push(dataEntry);
+          } else {
+            acc[year] = [dataEntry];
+          }
+          return acc;
+        }, {});
+
+        let overallResult = { name: 'Útflutningur', children: []};
+        _.forEach(dataByYear, (data, year) => {
+          // let yearResult = { name: 'Útflutningur', children: []};
+          _.forEach(data, dataCell => {
+            // console.log(dataCell);
+            const itemName = valueToText(dataCell.key[1], 'Vöruflokkar');
+            const marketArea = valueToText(dataCell.key[2], 'Markaðssvæði');
+            const itemGroup = getItemGroupFor(dataCell.key[1]);
+            const value = Number(dataCell.values[0]);
+
+            //console.log([itemName, marketArea, itemGroup, value]);
+            if (itemGroup && marketArea !== 'Alls') {
+              insertInto(overallResult, itemGroup, itemName, marketArea, value, year);
+            }
+          });
+          // overallResult[year] = yearResult;
+        });
+        fs.writeFileSync('../utflutningur_catfirst.json', JSON.stringify(overallResult, null, 4));
+
+    }
+
+    function saveDataRegionFirst(err, res, body){
+      const data = body.data;
+        const dataByYear = data.reduce((acc, dataEntry) => {
+          const year = Number(dataEntry.key[0]) + 1999;
+          if (acc[year]) {
+            acc[year].push(dataEntry);
+          } else {
+            acc[year] = [dataEntry];
+          }
+          return acc;
+        }, {});
+
+        let overallResult = { name: 'Útflutningur', children: []};
+        _.forEach(dataByYear, (data, year) => {
+          // let yearResult = { name: 'Útflutningur', children: []};
+          _.forEach(data, dataCell => {
+            // console.log(dataCell);
+            const itemName = valueToText(dataCell.key[1], 'Vöruflokkar');
+            const marketArea = valueToText(dataCell.key[2], 'Markaðssvæði');
+            const itemGroup = getItemGroupFor(dataCell.key[1]);
+            const value = Number(dataCell.values[0]);
+
+            //console.log([itemName, marketArea, itemGroup, value]);
+            if (itemGroup && marketArea !== 'Alls') {
+              insertInto(overallResult, marketArea, itemGroup, itemName, value, year);
+            }
+          });
+          // overallResult[year] = yearResult;
+        });
+        fs.writeFileSync('../utflutningur_regionfirst.json', JSON.stringify(overallResult, null, 4));
+
+    }
+
+
+    saveDataCatFirst(err, res, body);
+    saveDataRegionFirst(err, res, body);
+    
   });
 });
+
+
 
 function insertInto(result, itemGroup, itemName, marketArea, value, year) {
   const groupIndex = _.findIndex(result.children, group => group.name == itemGroup);

@@ -1,5 +1,7 @@
-var width = 1400,
-    height = 900,
+function app(jsonurl){
+
+var width = 700,
+    height = 700,
     radius = Math.min(width, height) / 2;
 
 var x = d3.scale.linear()
@@ -44,7 +46,7 @@ var info = $('#info');
 // Keep track of the node that is currently being displayed as the root.
 var node;
 
-d3.json("utflutningur_2_with_zeroes.json", function(error, root) {
+d3.json(jsonurl, function(error, root) {
   node = root;
   var g = svg.datum(root).selectAll('g')
       .data(partition.nodes)
@@ -230,4 +232,21 @@ $('#year-minus').click(function() {
   var currValue = yearSlider.slider('getValue');
   var nextValue = currValue - 1;
   yearSlider.slider('setValue', nextValue, true, true);
+});
+
+};
+
+var jsonurls = ["utflutningur_regionfirst.json", "utflutningur_catfirst.json"];
+
+function switchJsonFile(){
+  var url = jsonurls.pop();
+  jsonurls.unshift(url);
+  app(url);
+};
+
+switchJsonFile();
+
+$('#heirarchy-button').click(function() {
+  $("#d3container").empty();
+  switchJsonFile();
 });
